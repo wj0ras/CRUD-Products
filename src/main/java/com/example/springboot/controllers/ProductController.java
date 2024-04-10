@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,7 +46,7 @@ public class ProductController {
 	public ResponseEntity<Object> getOneProducts(@PathVariable(value="id") UUID id) {
 		Optional<ProductModel> productId = productRepository.findById(id);
 		if(productId.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(productId.get());
 	}
@@ -54,10 +55,20 @@ public class ProductController {
 	public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id,@RequestBody @Valid ProductRecordDto productRecordDto) {
 		Optional<ProductModel> productId = productRepository.findById(id);
 		if(productId.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
 		}
 		var productModel = productId.get();
 		BeanUtils.copyProperties(productRecordDto, productModel);
 		return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(productModel));
 		}
+	
+	@DeleteMapping("/products/{id}")
+	public ResponseEntity<Object> delectProduct(@PathVariable(value="id") UUID id) {
+		Optional<ProductModel> productId = productRepository.findById(id);
+		if(productId.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+		}
+		productRepository.delete(productId.get());
+		return ResponseEntity.status(HttpStatus.OK).body("Product deleted sucessfully.");
+	}
 }
