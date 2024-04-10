@@ -7,10 +7,12 @@ import java.util.UUID;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +20,7 @@ import com.example.springboot.dto.ProductRecordDto;
 import com.example.springboot.model.ProductModel;
 import com.example.springboot.repositories.ProductRepository;
 
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import jakarta.validation.Valid;
 
 @RestController
@@ -47,4 +50,14 @@ public class ProductController {
 		return ResponseEntity.status(HttpStatus.OK).body(productId.get());
 	}
 
+	@PutMapping("/products/{id}")
+	public ResponseEntity<Object> updateProduct(@PathVariable(value="id") UUID id,@RequestBody @Valid ProductRecordDto productRecordDto) {
+		Optional<ProductModel> productId = productRepository.findById(id);
+		if(productId.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+		}
+		var productModel = productId.get();
+		BeanUtils.copyProperties(productRecordDto, productModel);
+		return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(productModel));
+		}
 }
